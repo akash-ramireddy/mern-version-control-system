@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { MongoClient, ObjectId, ReturnDocument } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -35,7 +35,7 @@ const signup = async (req,res) => {
         const result = await usersCollection.insertOne(newUser);
 
         const token = jwt.sign({ id:result.insertedId },process.env.JWT_SECRET_KEY,{ expiresIn: "1h" });
-        res.send(token);
+        res.send({token, userId: result.insertedId});
     }
     catch(err){
         console.log("Error during the signUp: ",err);
@@ -58,7 +58,7 @@ const login = async (req,res) => {
             return res.status(400).json({message:"Invalid credientials!"});
         }
         const token = jwt.sign({id:user._id},process.env.JWT_SECRET_KEY,{expiresIn:"1h"});
-        res.json({token,userId:user._id});
+        res.json({token,userId:user._id.toString()});
     }
     catch(err) {
         console.error("Error during login: ",err.message);
